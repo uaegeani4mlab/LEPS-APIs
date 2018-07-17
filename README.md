@@ -1,4 +1,4 @@
-![alt text](http://www.leps-project.eu/)
+![LEPS Project Logo](http://www.leps-project.eu/sites/leps-project.eu/themes/zen/leps/images/logo_negativo.svg)
 
 # LEPS APIs by UAegean i4m available
 
