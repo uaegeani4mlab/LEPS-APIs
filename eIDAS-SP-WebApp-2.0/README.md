@@ -1,4 +1,4 @@
-# eIDAS WebApp 2.0
+# eIDAS SP WebApp 2.0
 
 ## Introduction
 
@@ -11,7 +11,7 @@ It was developed by the "Information Management Lab (i4M Lab)", participant of t
 
 ## Project Purpose
 
-The eIDAS WebApp 2.0 facilitates the integration of a SP with the eIDAS node by:
+The eIDAS SP WebApp 2.0 facilitates the integration of a SP with the eIDAS node by:
 
 - Allowing the SP to avoid development time for processing SAML messages
 
@@ -21,63 +21,51 @@ The eIDAS WebApp 2.0 facilitates the integration of a SP with the eIDAS node by:
 
 - Providing strong security assertions in the form of JWT ( RFC 7519)
 
-Important Note: In order to use the WebApp 2.0 for integration with the eIDAS GR node, it needs to be deployed in the same domain as the SP
+Important Note: In order to use the eIDAS SP WebApp 2.0 for integration with the eIDAS GR node using cookie as the claims delivery method, it needs to be deployed in the same domain as the SP
 
 ## Deployment
 
-Internally the eIDAS WebApp 2.0 uses the eIDAS SAML library presented https://github.com/ellak-monades-aristeias/eIDAS-SP-SAML-Tools-Library . Thus, the same steps presented in the deployment of the SAML library are required. These can be summed up to:
+Deployment requires the configuration of several enviromental variables and the editing of some files. This can be done directly at the hosting machine. However, this web app is also offered as a Docker image.Thus, the configuration can be made easier by using an appropriate .yml file.
 
-- The copying of the configEidas folder
-- Configure the keystore (eidasKeystore.jks)
-- Edit the configuration files (SignModule_SP.xml, EncryptModule_SP.xml, sp.properties)
-
-After configuring the SAML library we can proceed with the configuration of the eIDAS WebApp 2.0.
-This WebApp is also offered as a Docker image. Thus, in order to deploy the WebApp 2.0 the hosting machine must have a functional Docker engine.
-For instructions of how to setup Docker please refer to: https://docs.docker.com/install/ and follow the installation instructions depending on your hosting system (linux, windows, mac). Additionally for easier configuration of the container it is assumed that Docker compose is also installed (for instructions on installing docker compose please also refer to: https://docs.docker.com/compose/install/ ) although it is not a requirement.
+In such a case in order to deploy the WebApp 2.0 the hosting machine must have a functional Docker engine. For instructions of how to setup Docker please refer to: https://docs.docker.com/install/ and follow the installation instructions depending on your hosting system (linux, windows, mac). Additionally for easier configuration of the container it is assumed that Docker compose is also installed (for instructions on installing docker compose please also refer to: https://docs.docker.com/compose/install/ ) although it is not a requirement.
 
 ```
 version: '3'
 
 services:
 
-loginWebApp2:
-
-image: endimion13/eidas-gr-loginwebapp:3.1
-
-ports:
-
-- 9080:8090
-
-- 9090:8090
-
-environment:
-environment:
-    - EIDAS_PROPERTIES=CurrentFamilyName,CurrentGivenName,DateOfBirth,PersonIdentifier
-    - SP_FAIL_PAGE=http://eideusmartclass.aegean.gr/authFail
-    - SP_SUCCESS_PAGE=http://eideusmartclass.aegean.gr/eIDASSuccess
-    - SP_LOGO=/img/logo2.png
-    - ISS_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
-    - ISS_PRE_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
-    - SP_SERVER=https://eideusmartclass.aegean.gr
-    - SP_ID=sp1
-    - SP_SECRET=
-    - AUTH_DURATION=43800
-    - UAEGEAN_LOGIN=true
-    - CLIENT_ID=867kszvon99qp4
-    - REDIRECT_URI=https://eideusmartclass.aegean.gr/eIDASSuccess/linkedInResponse
-    - LINKED_IN_SECRET=  
-    - LINKED_IN=true
-    - URL_PREFIX=/eidasLogin
-    - UAEGEAN_AP=https://eidasiss.aegean.gr:8081/ISS2/ldap.jsp
-    - HTTP_HEADER=true
-    - ASYNC_SIGNATURE = true
-    - SP_JWT_CERT = path to private key keystore
-    - SP_KEY_PASS = password for the certificate;
-    - STORE_PASS = password for the keystore
-    - CERT_ALIAS = name of the certificate in the keystore
-volumes:
-- /configEidas:/configEidas
-- ./webappConfig:/webappConfig
+  loginWebApp2:
+    image: endimion13/eidas-gr-loginwebapp:4.0.5
+    ports:
+    - 9080:8090
+    - 9090:8090
+    environment:
+        - EIDAS_PROPERTIES=CurrentFamilyName,CurrentGivenName,DateOfBirth,PersonIdentifier
+        - SP_FAIL_PAGE=http://eideusmartclass.aegean.gr/authFail
+        - SP_SUCCESS_PAGE=http://eideusmartclass.aegean.gr/eIDASSuccess
+        - SP_LOGO=/img/logo2.png
+        - ISS_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
+        - ISS_PRE_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
+        - SP_SERVER=https://eideusmartclass.aegean.gr
+        - SP_ID=sp1
+        - SP_SECRET=
+        - AUTH_DURATION=43800
+        - UAEGEAN_LOGIN=true
+        - CLIENT_ID=867kszvon99qp4
+        - REDIRECT_URI=https://eideusmartclass.aegean.gr/eIDASSuccess/linkedInResponse
+        - LINKED_IN_SECRET=  
+        - LINKED_IN=true
+        - URL_PREFIX=/eidasLogin
+        - UAEGEAN_AP=https://eidasiss.aegean.gr:8081/ISS2/ldap.jsp
+        - HTTP_HEADER=true
+        - ASYNC_SIGNATURE = true
+        - SP_JWT_CERT = path to private key keystore
+        - SP_KEY_PASS = password for the certificate;
+        - STORE_PASS = password for the keystore
+        - CERT_ALIAS = name of the certificate in the keystore
+    volumes:
+    - /configEidas:/configEidas
+    - ./webappConfig:/webappConfig
 
 ```
 
@@ -178,7 +166,7 @@ The level of Assurance required by this SP for the provided authentication data.
 Deployment now is simply a matter of starting the services defined in such a compose file, for example: docker-compose -f loginService.yml up
 
 ## Integration
----
+
 For the rest of this document we assume that the WebApp 2.0 is deployed at http://www.host.com:8090.
 
 In order for the SP to interact with the WebApp 2.0 it needs to:
@@ -201,6 +189,6 @@ Upon receiving the token the SP should validate it and read the identification a
 This JWT contains two claims the "sub" which contains the actual eIDAS attributes and the "origin", which contains the source of the identification (e.g. eIDAS, LinkedIn etc.) In case of an error in the authentication process no JWT is generated, but the type of the error is handled internally by the WebApp and an appropriate message is presented to the user.
 
 ## Repository Contents
----
+
 - **src**, this repository folder contains the micro-service responsible for integrating the with the Greek eIDAS node
 - **deploy.yml**, this file contains an example configuration file that can be used as a starting point to deploying your application
