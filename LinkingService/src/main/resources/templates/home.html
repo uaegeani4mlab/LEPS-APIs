@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+        <meta charset="utf-8"></meta>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"></meta>
+        <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+        <meta name="description" content=""></meta>
+        <meta name="author" content=""></meta>
+        <title>Create a new account</title>
+        <!-- Compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css"></link>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
+        <link rel="stylesheet" href="css/main.css"></link>
+        <link rel="icon"
+              type="image/x-icon"
+              href="favicon.ico"></link>
+        <link rel="icon"
+              type="image/x-icon"
+              href="favicon.ico"></link>
+        <!-- Overide the sidebar css -->
+        <style>
+            .sideBarClass{
+                margin-top: 0;
+            }
+
+            .breadCrumbs{
+                font-size: 18px;
+                color:  #00be9f;
+                padding-left: 0px;
+            }
+        </style>
+    </head>
+    <body>
+
+
+        <div th:replace="header :: header">Header</div>
+
+        <div class="container">
+
+            <div class="row  mainContent">
+
+                <div class="col s12 m12 l10">
+
+                    <div class="container" style="width: 90%;">
+
+                        <div class="row breadCrumbs">
+                            <div class="col s12" style="font-size: smaller;" >
+                                <a  onclick="langGR()" style="cursor: pointer">Greek</a>
+                                <a  onclick="langEN()" style="cursor: pointer; margin-left: 0.5rem;">English</a>
+                            </div>
+
+                            <div class="col s12" style="font-size: larger;" th:text="#{heading}">
+                                <!--<span th:text="#{step}">STEP | </span> <b th:text="#{step.go}">GO!</b>-->
+                                <!--e-Identity Linking Service-->
+                            </div>
+
+                        </div>
+
+                        <div class="row instructions">
+                            <div  id="mobile" class="col s12 flow-text hide-on-large-only">
+                                <!--This is a test Mobile view-->
+                            </div>
+                            <div   class="col s12  hide-on-med-and-down ">
+                                <!--Test desktop view-->
+                            </div>
+
+
+
+
+
+                            <div id="buttons" class="col m6" style="margin-top: 1.5em">
+                                <div th:if="${eid != null}" class="col m12">
+                                    <input id="eid" type="hidden" th:value="${eid}"/>
+                                    <input id="source" type="hidden" th:value="${source}"/>
+
+                                    <div class="col s12 m12 ">
+                                        <a id="next" class="waves-effect waves-light btn-large swell-btn next-btn" th:href="linked" >View linked accounts</a>
+                                    </div>
+
+                                    <div class="col s12 m12">
+                                        <a id="next" class="waves-effect waves-light btn-large swell-btn next-btn" th:href="${login}">Link an account</a>
+                                    </div>
+                                </div>
+
+                                <div th:if="${eid == null}" class="col m12">
+                                    <div class="col s12 m12">
+                                        <a id="next" class="waves-effect waves-light btn-large swell-btn next-btn" th:href="${login}">Login with an e-Identity</a>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+                            <div id="text" class="col m6">
+                                <p th:text="#{usage.first}">
+                                    To Link one of your e-Identities click on the button "Link and account". You will be next asked 
+                                    which identity you wish to link a proceed accordingly. 
+                                </p>
+                                <p th:text="#{usage.second}">
+                                    To review your linked e-Identities you must be logged in. Next, click the button "View linked accounts". This will inform you of all the 
+                                    e-Identities you have linked together, as well as present to you all the information the system has on you. 
+                                </p>
+                            </div>
+
+                        </div>
+
+
+                        <div id="modal1" class="modal">
+                            <div class="modal-content">
+                                <h4>e-Identity Received!</h4>
+                                <p>Your e-Identities have been linked successfully</p>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+
+                <!--                <div class="col s12 m12 l2">
+                                    <div   th:replace="sidebar :: sidebar"></div>
+                                </div>-->
+
+
+
+
+            </div>
+            <!--<div th:replace="modalProperties :: modalProperties"></div>-->
+            <div class="row" th:replace="footer :: footer"></div>
+
+        </div>
+
+        <!--Import jQuery before materialize.js-->
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+        <!-- Compiled and minified JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+        <script th:inline="javascript">
+                                    /*<![CDATA[*/
+                                    $(document).ready(function () {
+                                        $('.modal').modal();
+                                        
+                                        function linkUid() {
+                                            let eidValue = $("#eid").val();
+                                            let sourceValue = $("#source").val();
+                                            if (eidValue) {
+                                                if (getCookie("session") !== "") {
+
+                                                    $.ajax({
+                                                        url: 'link',
+                                                        type: 'post',
+                                                        data: {
+                                                            eid: eidValue,
+                                                            source: sourceValue
+                                                        },
+                                                        headers: {
+                                                            sesionId: getCookie("session")   //If your header name has spaces or any other char not appropriate
+                                                        },
+                                                        dataType: 'json'
+                                                    })
+                                                            .done(function (data) {
+                                                                if (data.code == "OK") {
+//                                                                    alert("Link Created!");
+                                                                      $('.modal').modal('open');
+                                                                } else {
+                                                                    if (data.error) {
+//                                                                        alert(data.error);
+                                                                        if (data.error === "session not found") {
+                                                                            //delete all session and start over the process
+                                                                            document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+                                                                            linkUid();
+                                                                        }
+                                                                    }
+                                                                }
+                                                            });
+                                                } else {
+                                                    $.post("link", {eid: eidValue, source: sourceValue}).done(function (data) {
+                                                        if (data.code == "NEW") {
+                                                            setCookie("session", data.uuid);
+                                                        } else {
+                                                            if (data.error) {
+                                                                alert(data.error);
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+
+
+                                        function getCookie(cname) {
+                                            var name = cname + "=";
+                                            var decodedCookie = decodeURIComponent(document.cookie);
+                                            var ca = decodedCookie.split(';');
+                                            for (var i = 0; i < ca.length; i++) {
+                                                var c = ca[i];
+                                                while (c.charAt(0) == ' ') {
+                                                    c = c.substring(1);
+                                                }
+                                                if (c.indexOf(name) == 0) {
+                                                    return c.substring(name.length, c.length);
+                                                }
+                                            }
+                                            return "";
+                                        }
+
+                                        function setCookie(cname, cvalue, exdays) {
+                                            var d = new Date();
+                                            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+                                            var expires = "expires=" + d.toUTCString();
+                                            document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+                                        }
+                                        linkUid();
+                                    });
+
+                                    function langGR() {
+//                                        window.location.href = 'login?localeCode=gr';
+                                        insertParam("localeCode", "gr");
+                                    }
+                                    function langEN() {
+                                        insertParam("localeCode", "en");
+//                                        window.location.href = 'login?localeCode=en';
+                                    }
+
+                                    function insertParam(key, value)
+                                    {
+                                        key = encodeURI(key);
+                                        value = encodeURI(value);
+
+                                        var kvp = document.location.search.substr(1).split('&');
+
+                                        var i = kvp.length;
+                                        var x;
+                                        while (i--)
+                                        {
+                                            x = kvp[i].split('=');
+
+                                            if (x[0] == key)
+                                            {
+                                                x[1] = value;
+                                                kvp[i] = x.join('=');
+                                                break;
+                                            }
+                                        }
+
+                                        if (i < 0) {
+                                            kvp[kvp.length] = [key, value].join('=');
+                                        }
+
+                                        //this will reload the page, it's likely better to store this until finished
+                                        document.location.search = kvp.join('&');
+                                    }
+
+                                    /*]]>*/
+        </script>
+    </body>
+</html>

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author nikos
  */
 @RestController
-public class RestControllers {
+public class APIControllers {
 
     @Autowired
     private CacheManager cacheManager;
@@ -34,6 +34,10 @@ public class RestControllers {
     @Autowired
     private LinksService linkServ;
 
+    
+    private final static String SESSION_NOT_FOUND="session not found";
+    
+    
     @RequestMapping(value = "/match", method = RequestMethod.GET)
     @ApiOperation(value = "Checks for an existing eid linking match, and if found it returns it", response = LinkingResponse.class)
     public LinkingResponse getMatch(String eIdentifier) {
@@ -51,11 +55,12 @@ public class RestControllers {
         if (sessionIdentifier != null) {
             ValueWrapper existingLinksWrapper = cacheManager.getCache("sessions").get(sessionIdentifier);
             if (existingLinksWrapper!= null && existingLinksWrapper.get() != null) {
-                LinkedSetTO existing = (LinkedSetTO) existingLinksWrapper.get();
-                linkServ.addEidToLinkById(eid, source, existing.getId());
+                LinkedSetTO cachedSet = (LinkedSetTO) existingLinksWrapper.get();
+                linkServ.addEidToLinkById(eid, source, cachedSet.getId());
+                cacheManager.getCache("sessions").put(sessionIdentifier,cachedSet);
                 return new LinkingResponse(ResponseCodes.OK, null, null, null);
             } else {
-                return new LinkingResponse(ResponseCodes.ERROR, null, null, "session not found");
+                return new LinkingResponse(ResponseCodes.ERROR, null, null, SESSION_NOT_FOUND);
             }
 
         } else {

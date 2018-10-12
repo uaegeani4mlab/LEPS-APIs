@@ -19,6 +19,7 @@ public interface LinksService {
     public void addEidToLinkByObj(String eid,String source, LinkedSetTO set);
     
     public LinkedSetTO findByEid(String eid) throws IndexOutOfBoundsException;
+    public LinkedSetTO findById(Long id) ;
     
     public Long saveLinkSet(LinkedSetTO link);
 }

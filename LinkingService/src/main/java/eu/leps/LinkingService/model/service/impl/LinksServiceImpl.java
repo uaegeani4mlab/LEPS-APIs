@@ -15,6 +15,7 @@ import eu.leps.LinkingService.model.wrappers.WrapTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,11 +38,15 @@ public class LinksServiceImpl implements LinksService {
     @Transactional
     public void addEidToLinkById(String eid, String source, Long linkId) {
         Optional<LinkedSetDMO> link = linksRepo.findById(linkId);
-        if(link.isPresent()){
-            EidDMO newEid = new EidDMO(link.get().getId(), eid, source);
-            link.get().getEids().add(newEid);
-            linksRepo.save(link.get());
-        }else{
+        if (link.isPresent()) {
+            List<String> eids = link.get().getEids().stream().map(eidDmo -> {return eidDmo.getEid();}).collect(Collectors.toList());
+            if (!eids.contains(eid)) {
+                EidDMO newEid = new EidDMO(link.get().getId(), eid, source);
+                link.get().getEids().add(newEid);
+                linksRepo.save(link.get());
+            }
+
+        } else {
             throw new IndexOutOfBoundsException("Not result for given linkID");
         }
     }
@@ -63,15 +68,27 @@ public class LinksServiceImpl implements LinksService {
             }
             throw new IndexOutOfBoundsException("More than 1 matching eids found!!");
         }
-        LinkedSetTO empty = new LinkedSetTO(null, new ArrayList(),null);
+        LinkedSetTO empty = new LinkedSetTO(null, new ArrayList(), null);
         return empty;
     }
 
     @Override
+    @Transactional
     public Long saveLinkSet(LinkedSetTO link) {
         LinkedSetDMO set = WrapDMO.wrapLinkSet(link);
         linksRepo.save(set);
         return set.getId();
+    }
+
+    @Override
+    @Transactional
+    public LinkedSetTO findById(Long id) {
+        Optional<LinkedSetDMO> set = linksRepo.findById(id);
+        if(set.isPresent()){
+            return WrapTO.wrapLinkSet(set.get());
+        }else{
+            return new LinkedSetTO(null, new ArrayList(), null);
+        }
     }
 
 }
