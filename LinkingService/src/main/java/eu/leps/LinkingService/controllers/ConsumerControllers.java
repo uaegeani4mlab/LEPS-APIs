@@ -12,6 +12,7 @@ import eu.leps.LinkingService.model.service.LinksService;
 import eu.leps.LinkingService.model.wrappers.WrapEids;
 import io.jsonwebtoken.Jwts;
 import java.io.UnsupportedEncodingException;
+import java.security.Key;
 import java.util.Base64;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -40,13 +41,15 @@ public class ConsumerControllers {
     @Autowired
     private LinksService linkServ;
 
-    private final static String encodedKey = "QjG+wP1CbAH2z4PWlWIDkxP4oRlgK2vos5/jXFfeBw8=";
+    private final static String secretKey = "QjG+wP1CbAH2z4PWlWIDkxP4oRlgK2vos5/jXFfeBw8=";
+//    private final static String encodedKey = "secret";
 
     private final static String LOGIN_URL = "LOGIN_URL";
 
+//    private final static 
     /**
-     * accepts a JWT containing an eId response (from the eIDAS webApp)
-     * the  jwt can come either as a url param or a cookie
+     * accepts a JWT containing an eId response (from the eIDAS webApp) the jwt
+     * can come either as a url param or a cookie
      */
     @GetMapping(value = {"/eidResponse", "/"})
     public String getEidResponse(@RequestParam(value = "access_token", required = false) String jwsParam,
@@ -56,16 +59,16 @@ public class ConsumerControllers {
 //        byte[] keyBytes = key.getEncoded();
 //        String base64Encoded = new String(Base64.getEncoder().encode(keyBytes), StandardCharsets.UTF_8);
         // decode the base64 encoded string
-        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+//        byte[] keyBytes = secretKey.getBytes("UTF-8");//Base64.getDecoder().decode(secretKey);
         // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "HmacSHA256");
-
+//        SecretKey originalKey = new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
+        Key key = new SecretKeySpec(secretKey.getBytes("UTF-8"), 0, secretKey.length(), "HmacSHA256");
         String jws = !StringUtils.isEmpty(jwsParam) ? jwsParam : cookieJWS;
         try {
             if (jws != null) {
-                String sub = Jwts.parser().setSigningKey(originalKey).parseClaimsJws(jws).getBody().getSubject();
-                String origin = Jwts.parser().setSigningKey(originalKey).parseClaimsJws(jws).getBody().get("origin", String.class);
-                String email = Jwts.parser().setSigningKey(originalKey).parseClaimsJws(jws).getBody().get("email", String.class);
+                String sub = Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().getSubject();
+                String origin = Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().get("origin", String.class);
+                String email = Jwts.parser().setSigningKey(key).parseClaimsJws(jws).getBody().get("email", String.class);
 
                 EidCredentials creds = WrapEids.parseJWTSubject(sub);
                 creds.setEmail(email);
