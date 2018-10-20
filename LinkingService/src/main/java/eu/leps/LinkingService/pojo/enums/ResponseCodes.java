@@ -12,5 +12,6 @@ package eu.leps.LinkingService.pojo.enums;
 public enum ResponseCodes {
     OK,
     ERROR,
-    NEW
+    NEW,
+    EXISTS
 }

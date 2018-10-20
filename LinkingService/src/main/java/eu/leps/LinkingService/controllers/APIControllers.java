@@ -13,6 +13,8 @@ import eu.leps.LinkingService.pojo.enums.ResponseCodes;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
@@ -34,10 +36,10 @@ public class APIControllers {
     @Autowired
     private LinksService linkServ;
 
-    
-    private final static String SESSION_NOT_FOUND="session not found";
-    
-    
+    private final static Logger LOG = LoggerFactory.getLogger(APIControllers.class);
+
+    private final static String SESSION_NOT_FOUND = "session not found";
+
     @RequestMapping(value = "/match", method = RequestMethod.GET)
     @ApiOperation(value = "Checks for an existing eid linking match, and if found it returns it", response = LinkingResponse.class)
     public LinkingResponse getMatch(String eIdentifier) {
@@ -52,16 +54,19 @@ public class APIControllers {
     @ApiOperation(value = "Accepts an eID. If there exists a pending session, then this is linked to the other sessions eids. "
             + "Else a new session is generated", response = LinkingResponse.class)
     public LinkingResponse link(String eid, String source, @RequestHeader(value = "sesionId", required = false) String sessionIdentifier) {
+
         if (sessionIdentifier != null) {
             ValueWrapper existingLinksWrapper = cacheManager.getCache("sessions").get(sessionIdentifier);
-            if (existingLinksWrapper!= null && existingLinksWrapper.get() != null) {
+            if (existingLinksWrapper != null && existingLinksWrapper.get() != null) {
                 LinkedSetTO cachedSet = (LinkedSetTO) existingLinksWrapper.get();
-                linkServ.addEidToLinkById(eid, source, cachedSet.getId());
-                cacheManager.getCache("sessions").put(sessionIdentifier,cachedSet);
-                return new LinkingResponse(ResponseCodes.OK, null, null, null);
-            } else {
-                return new LinkingResponse(ResponseCodes.ERROR, null, null, SESSION_NOT_FOUND);
+                if (cachedSet != null) {
+                    ResponseCodes response = linkServ.addEidToLinkById(eid, source, cachedSet.getId());
+                    cacheManager.getCache("sessions").put(sessionIdentifier, cachedSet);
+                    return new LinkingResponse(response, null, null, null);
+                }
             }
+
+            return new LinkingResponse(ResponseCodes.ERROR, null, null, SESSION_NOT_FOUND);
 
         } else {
             UUID uuid = UUID.randomUUID();
@@ -69,7 +74,7 @@ public class APIControllers {
             ArrayList<EidTO> links = new ArrayList();
             links.add(link);
             LinkedSetTO linkSet = new LinkedSetTO(uuid.toString(), links, null);
-                    
+
             linkSet.setId(linkServ.saveLinkSet(linkSet));
             cacheManager.getCache("sessions").put(uuid.toString(), linkSet);
             return new LinkingResponse(ResponseCodes.NEW, null, uuid.toString(), null);

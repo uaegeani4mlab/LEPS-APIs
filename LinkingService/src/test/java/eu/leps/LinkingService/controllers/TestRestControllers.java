@@ -10,6 +10,7 @@ import eu.leps.LinkingService.controllers.TestRestControllers.TestConfig;
 import eu.leps.LinkingService.model.TO.EidTO;
 import eu.leps.LinkingService.model.TO.LinkedSetTO;
 import eu.leps.LinkingService.model.service.LinksService;
+import eu.leps.LinkingService.pojo.enums.ResponseCodes;
 import java.util.ArrayList;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
@@ -79,6 +80,9 @@ public class TestRestControllers {
         results.add(res2);
         when(linkServ.findByEid(FOUND_EID)).thenReturn(new LinkedSetTO(null, results, Long.valueOf(0)));
         when(linkServ.saveLinkSet((LinkedSetTO) org.mockito.ArgumentMatchers.any(LinkedSetTO.class))).thenReturn(Long.valueOf(0));
+        when(linkServ.addEidToLinkById(org.mockito.ArgumentMatchers.any(String.class), 
+                org.mockito.ArgumentMatchers.any(String.class),org.mockito.ArgumentMatchers.any(Long.class)))
+                .thenReturn(ResponseCodes.OK);
 
         mockWrapper = Mockito.mock(Cache.ValueWrapper.class);
         cache = PowerMockito.mock(Cache.class);
@@ -124,14 +128,15 @@ public class TestRestControllers {
         EidTO res2 = new EidTO("eid21", "uaegean");
         results.add(res1);
         results.add(res2);
-        LinkedSetTO cachedSet = new LinkedSetTO(null, results, null);
+        LinkedSetTO cachedSet = new LinkedSetTO(null, results, Long.valueOf(1));
 
         Mockito.when(mockWrapper.get()).thenReturn(cachedSet);
 
         mvc.perform(
                 post("/link")
                         .header("sesionId", VALID_SESSION_ID)
-                        .param("eid", "postedValue"))
+                        .param("eid", "postedValue")
+                        .param("source", "test"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code", is("OK")));

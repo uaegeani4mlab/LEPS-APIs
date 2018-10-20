@@ -6,6 +6,7 @@
 package eu.leps.LinkingService.model.service;
 
 import eu.leps.LinkingService.model.TO.LinkedSetTO;
+import eu.leps.LinkingService.pojo.enums.ResponseCodes;
 
 /**
  *
@@ -14,9 +15,9 @@ import eu.leps.LinkingService.model.TO.LinkedSetTO;
 public interface LinksService {
     
     
-    public void addEidToLinkById(String eid,String source, Long linkId);
+    public ResponseCodes addEidToLinkById(String eid,String source, Long linkId);
 
-    public void addEidToLinkByObj(String eid,String source, LinkedSetTO set);
+//    public void addEidToLinkByObj(String eid,String source, LinkedSetTO set);
     
     public LinkedSetTO findByEid(String eid) throws IndexOutOfBoundsException;
     public LinkedSetTO findById(Long id) ;

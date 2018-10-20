@@ -12,6 +12,7 @@ import eu.leps.LinkingService.model.TO.LinkedSetTO;
 import eu.leps.LinkingService.model.service.LinksService;
 import eu.leps.LinkingService.model.wrappers.WrapDMO;
 import eu.leps.LinkingService.model.wrappers.WrapTO;
+import eu.leps.LinkingService.pojo.enums.ResponseCodes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,27 +37,31 @@ public class LinksServiceImpl implements LinksService {
 
     @Override
     @Transactional
-    public void addEidToLinkById(String eid, String source, Long linkId) {
+    public ResponseCodes addEidToLinkById(String eid, String source, Long linkId) {
         Optional<LinkedSetDMO> link = linksRepo.findById(linkId);
+        
         if (link.isPresent()) {
             List<String> eids = link.get().getEids().stream().map(eidDmo -> {return eidDmo.getEid();}).collect(Collectors.toList());
             if (!eids.contains(eid)) {
                 EidDMO newEid = new EidDMO(link.get().getId(), eid, source);
                 link.get().getEids().add(newEid);
                 linksRepo.save(link.get());
+                return ResponseCodes.OK;
+            }else{
+                return ResponseCodes.EXISTS;
             }
-
         } else {
-            throw new IndexOutOfBoundsException("Not result for given linkID");
+            return ResponseCodes.ERROR;
+//            throw new IndexOutOfBoundsException("Not result for given linkID");
         }
     }
 
-    @Override
-    @Transactional
-    //TODO
-    public void addEidToLinkByObj(String eid, String source, LinkedSetTO set) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    @Transactional
+//    //TODO
+//    public void addEidToLinkByObj(String eid, String source, LinkedSetTO set) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     @Override
     @Transactional

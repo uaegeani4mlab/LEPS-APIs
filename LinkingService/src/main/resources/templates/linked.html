@@ -53,18 +53,14 @@
 
                             <div class="col s12" style="font-size: larger;" th:text="#{linked.accounts}">
                                 <!--<span th:text="#{step}">STEP | </span> <b th:text="#{step.go}">GO!</b>-->
-                              
+
                             </div>
 
                         </div>
 
                         <div class="row instructions">
-                            <div  id="mobile" class="col s12 flow-text hide-on-large-only">
-                                This is a test Mobile view
-
-                                These are your linked accounts                              
-                            </div>
-                            <div   class="col s12  hide-on-med-and-down " >
+                            < 
+                            <div   class="col s12  " >
 
                                 <!--The following eIDS have been linked together-->
 
@@ -116,13 +112,13 @@
                                     });
                                     function langGR() {
 //                                        window.location.href = 'login?localeCode=gr';
-                                          insertParam("localeCode","gr");
+                                        insertParam("localeCode", "gr");
                                     }
                                     function langEN() {
-                                        insertParam("localeCode","en");
+                                        insertParam("localeCode", "en");
 //                                        window.location.href = 'login?localeCode=en';
                                     }
-                                    
+
                                     function insertParam(key, value)
                                     {
                                         key = encodeURI(key);

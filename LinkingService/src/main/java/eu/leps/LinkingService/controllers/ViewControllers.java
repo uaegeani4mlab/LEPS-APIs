@@ -13,8 +13,6 @@ import eu.leps.LinkingService.model.wrappers.WrapEids;
 import io.jsonwebtoken.Jwts;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
-import java.util.Base64;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -31,7 +29,7 @@ import org.thymeleaf.util.StringUtils;
  * @author nikos
  */
 @Controller
-public class ConsumerControllers {
+public class ViewControllers {
 
     @Autowired
     private ConfigProperties props;

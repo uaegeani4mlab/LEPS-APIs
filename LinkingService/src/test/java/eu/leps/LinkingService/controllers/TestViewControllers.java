@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author nikos
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@WebMvcTest(ConsumerControllers.class)
+@WebMvcTest(ViewControllers.class)
 @ContextConfiguration(classes = {TestRestControllers.TestConfig.class, LinkingServiceApplication.class})
 public class TestViewControllers {
 
