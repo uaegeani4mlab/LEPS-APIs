@@ -95,7 +95,30 @@ public class TestJwtUtils {
         String decryptedEmailClaim = Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws).getBody().get("email", String.class);
 
         assertEquals(decryptedSubject, "{\"eid\":\"nikos@aegean.gr\",\"name\":\"nikos\"}");
-        assertEquals(decryptedEmailClaim,"nikos@aegean.gr");
+        assertEquals(decryptedEmailClaim, "nikos@aegean.gr");
+
+    }
+
+    @Test
+    public void testAddClaimToJwt() throws JsonProcessingException, UnsupportedEncodingException,
+            KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableKeyException {
+
+        Map<String, String> jsonMap = new HashMap<>();
+        jsonMap.put("name", "nikos");
+        jsonMap.put("eid", "nikos@aegean.gr");
+        String compactJws = JwtUtils.getJWT(jsonMap, paramServ, keyServ, "myOrigin");
+
+        String extendedJws = JwtUtils.addClaim("return", "base64Url", compactJws, paramServ, keyServ);
+
+        PublicKey key = keyServ.getJWTPublicKey();
+        //term signing key here is confusing... we decrypt with the public key ;)
+        String decryptedReturnClaim = Jwts.parser().setSigningKey(key).parseClaimsJws(extendedJws).getBody().get("return", String.class);
+        String decryptedSubject = Jwts.parser().setSigningKey(key).parseClaimsJws(compactJws).getBody().getSubject();
+        String decryptedOriginClaim = Jwts.parser().setSigningKey(key).parseClaimsJws(extendedJws).getBody().get("origin", String.class);
+        
+        assertEquals(decryptedReturnClaim, "base64Url");
+        assertEquals(decryptedSubject, "{\"eid\":\"nikos@aegean.gr\",\"name\":\"nikos\"}");
+        assertEquals(decryptedOriginClaim,"myOrigin");
 
     }
 

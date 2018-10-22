@@ -5,6 +5,7 @@
  */
 package gr.uagean.dsIss.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import gr.uagean.dsIss.model.pojo.LinkedInAuthAccessToken;
 import gr.uagean.dsIss.service.CountryService;
 import gr.uagean.dsIss.service.EidasPropertiesService;
@@ -13,9 +14,14 @@ import gr.uagean.dsIss.service.ParameterService;
 import gr.uagean.dsIss.utils.CookieUtils;
 import gr.uagean.dsIss.utils.JwtUtils;
 import gr.uagean.dsIss.utils.LinkedInResponseParser;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +88,7 @@ public class ViewControllers {
     @Autowired
     private KeyStoreService keyServ;
 
-    @RequestMapping(value={"/login","/login-linkedin"})
+    @RequestMapping(value = {"/login", "/login-linkedin"})
     public ModelAndView loginView(HttpServletRequest request, @RequestParam(value = "return", required = false) String redUrl) {
         UUID token = UUID.randomUUID();
 //        if (cacheManager.getCache("ips").get(request.getRemoteAddr()) != null) {
@@ -140,7 +146,12 @@ public class ViewControllers {
 
             if (paramServ.getParam(URL_ENCODED) != null && Boolean.parseBoolean(paramServ.getParam(URL_ENCODED))) {
                 if (cacheManager.getCache("ips").get(token) != null && cacheManager.getCache("ips").get(token).get() != null) {
-                    return "redirect:" + cacheManager.getCache("ips").get(token).get() + "?login=" + jwt;
+                    try {
+                        //return "redirect:" + cacheManager.getCache("ips").get(token).get() + "?login=" + jwt;
+                        jwt = JwtUtils.addClaim("return", (String) cacheManager.getCache("ips").get(token).get(), jwt, paramServ, keyServ);
+                    } catch (Exception ex) {
+                        log.info(ex.getMessage());
+                    }
                 }
                 return "redirect:" + paramServ.getParam(SP_SUCCESS_PAGE) + "?login=" + jwt;
             } else {
